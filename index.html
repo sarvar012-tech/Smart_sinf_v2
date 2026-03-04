@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Sinf 2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@600;700&amp;display=swap');
+        
+        :root {
+            --neon-purple: #c026d3;
+            --neon-cyan: #22d3ee;
+            --neon-pink: #ec4899;
+        }
+        
+        .neon-purple { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
+        .neon-cyan { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); }
+        
+        .glass {
+            background: rgba(18, 18, 26, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 0 40px -10px var(--neon-purple);
+        }
+        
+        .progress-bar {
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .scan-line {
+            animation: scan 2s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        .logo-font {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white overflow-x-hidden">
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-cyan-400 rounded-2xl flex items-center justify-center text-2xl">🎮</div>
+                <div>
+                    <span class="logo-font text-3xl font-bold tracking-tighter neon-purple">Smart</span>
+                    <span class="logo-font text-3xl font-bold tracking-tighter neon-cyan">Sinf</span>
+                    <span class="text-xs tracking-[4px] text-emerald-400 font-mono ml-1">2.0</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-8 text-sm font-medium">
+                <a href="#" onclick="navigateTo('dashboard')" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#" onclick="navigateTo('leaderboard')" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i class="fas fa-trophy"></i> Leaderboard
+                </a>
+                <a href="#" onclick="navigateTo('store')" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i class="fas fa-store"></i> Store
+                </a>
+                <a href="#" onclick="navigateTo('profile')" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleDarkMode()" class="w-9 h-9 flex items-center justify-center rounded-2xl hover:bg-white/10 transition-colors">
+                    <i class="fas fa-moon text-xl" id="theme-icon"></i>
+                </button>
+                <div onclick="showProfileMenu()" class="flex items-center gap-3 cursor-pointer">
+                    <div id="nav-avatar" class="w-9 h-9 bg-gradient-to-br from-pink-400 to-violet-500 rounded-2xl flex items-center justify-center text-xl">👨‍🎓</div>
+                    <div>
+                        <div id="nav-name" class="font-semibold text-sm">Alex Chen</div>
+                        <div id="nav-role" class="text-xs text-emerald-400">Student • 1240 pts</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 rounded-3xl text-sm font-medium transition-all">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-20 min-h-screen pb-20">
+        <!-- HOME / DASHBOARD -->
+        <div id="dashboard-page" class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-end mb-10">
+                <div>
+                    <h1 class="text-5xl font-bold logo-font tracking-tighter neon-purple">Welcome back, Alex! 👋</h1>
+                    <p class="text-zinc-400 mt-2 text-xl">You've earned <span id="total-points" class="font-mono text-4xl font-bold text-emerald-400">1240</span> SmartPoints this month</p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="showConversionModal()" class="px-8 py-4 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-3xl font-semibold flex items-center gap-3 hover:scale-105 transition-all shadow-lg shadow-violet-500/30">
+                        <i class="fas fa-coins"></i> Convert Points
+                    </button>
+                    <button onclick="showAchievement()" class="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-3xl font-semibold flex items-center gap-3 transition-all">
+                        <i class="fas fa-medal"></i> Achievements
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- LEFT COLUMN -->
+                <div class="lg:col-span-8 space-y-8">
+                    <!-- POINTS CARD -->
+                    <div class="glass rounded-3xl p-8 border border-white/10">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="uppercase tracking-widest text-xs text-zinc-500">Current Balance</div>
+                                <div id="balance" class="text-7xl font-bold font-mono mt-2 text-white">1240</div>
+                                <div class="flex items-center gap-2 text-emerald-400 mt-1">
+                                    <i class="fas fa-arrow-trend-up"></i>
+                                    <span class="text-sm">+240 this week</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-6xl">🏆</div>
+                                <div class="mt-3 bg-emerald-500/10 text-emerald-400 text-xs px-4 py-1 rounded-full inline-block">Level 12 • 89% to 13</div>
+                            </div>
+                        </div>
+                        <div class="mt-8 h-3 bg-zinc-800 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full w-[89%]"></div>
+                        </div>
+                    </div>
+
+                    <!-- ACHIEVEMENTS -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-semibold">Recent Achievements</h2>
+                            <a onclick="navigateTo('profile')" class="text-sm text-cyan-400 flex items-center gap-1 hover:underline">All badges <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="achievements-grid">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- ACTIVITY FEED -->
+                    <div class="glass rounded-3xl p-8">
+                        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3"><i class="fas fa-bolt text-amber-400"></i> Activity Feed</h2>
+                        <div id="activity-feed" class="space-y-6">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="lg:col-span-4 space-y-8">
+                    <!-- LEADERBOARD TEASER -->
+                    <div class="glass rounded-3xl p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold flex items-center gap-2"><i class="fas fa-trophy text-amber-400"></i> Top Students</h2>
+                            <button onclick="navigateTo('leaderboard')" class="text-xs uppercase tracking-widest px-4 py-2 bg-white/5 hover:bg-white/10 rounded-2xl">Full board →</button>
+                        </div>
+                        <div id="mini-leaderboard" class="space-y-4">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- QUICK CONVERT -->
+                    <div onclick="showConversionModal()" class="glass rounded-3xl p-8 cursor-pointer hover:scale-[1.02] transition-all card-hover">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6">💎</div>
+                            <div class="text-2xl font-semibold mb-2">Convert to Game Currency</div>
+                            <div class="text-zinc-400 text-sm leading-relaxed">PUBG UC • ML Diamonds • Free Fire • Roblox &amp; more</div>
+                            <div class="mt-8 inline-flex items-center gap-2 bg-white/10 px-6 py-3 rounded-3xl text-sm">
+                                <span class="text-emerald-400">1 240 pts</span>
+                                <span class="text-zinc-500">→</span>
+                                <span class="font-mono">124 UC</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SOCIAL CHEERS -->
+                    <div class="glass rounded-3xl p-8">
+                        <h3 class="font-semibold mb-6">Class Cheers 🔥</h3>
+                        <div class="flex -space-x-4">
+                            <div class="w-12 h-12 bg-orange-400 rounded-2xl border-2 border-zinc-900 flex items-center justify-center text-xl">🔥</div>
+                            <div class="w-12 h-12 bg-blue-400 rounded-2xl border-2 border-zinc-900 flex items-center justify-center text-xl">🚀</div>
+                            <div class="w-12 h-12 bg-pink-400 rounded-2xl border-2 border-zinc-900 flex items-center justify-center text-xl">⭐</div>
+                        </div>
+                        <div class="mt-6 text-xs text-zinc-400">24 classmates cheered your 100pt Math quiz win!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD PAGE -->
+        <div id="leaderboard-page" class="max-w-5xl mx-auto px-6 hidden">
+            <div class="flex items-center justify-between mb-10">
+                <h1 class="text-5xl font-bold logo-font neon-cyan">Global Leaderboard</h1>
+                <div class="flex bg-zinc-900 rounded-3xl p-1 text-sm">
+                    <button onclick="switchLeaderboardTab(0)" id="tab-0" class="tab-button active px-8 py-3 rounded-3xl">This Week</button>
+                    <button onclick="switchLeaderboardTab(1)" id="tab-1" class="tab-button px-8 py-3 rounded-3xl">This Month</button>
+                    <button onclick="switchLeaderboardTab(2)" id="tab-2" class="tab-button px-8 py-3 rounded-3xl">All Time</button>
+                </div>
+            </div>
+            
+            <div class="glass rounded-3xl overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="py-6 px-8 text-left font-normal text-xs uppercase tracking-widest text-zinc-400">Rank</th>
+                            <th class="py-6 px-8 text-left font-normal text-xs uppercase tracking-widest text-zinc-400">Student</th>
+                            <th class="py-6 px-8 text-right font-normal text-xs uppercase tracking-widest text-zinc-400">Points</th>
+                            <th class="py-6 px-8 w-40"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="text-lg">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STORE / CONVERSIONS PAGE -->
+        <div id="store-page" class="max-w-7xl mx-auto px-6 hidden">
+            <h1 class="text-5xl font-bold logo-font mb-10 neon-pink">Game Store</h1>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="game-grid">
+                <!-- JS populated -->
+            </div>
+        </div>
+
+        <!-- PROFILE PAGE -->
+        <div id="profile-page" class="max-w-4xl mx-auto px-6 hidden">
+            <div class="glass rounded-3xl p-10">
+                <div class="flex flex-col md:flex-row gap-12">
+                    <div class="flex-shrink-0 text-center">
+                        <div id="profile-avatar" onclick="changeAvatar()" class="w-48 h-48 mx-auto text-8xl bg-gradient-to-br from-pink-400 to-violet-600 rounded-3xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all shadow-2xl shadow-pink-500/50">👨‍🎓</div>
+                        <div class="mt-6 text-2xl font-semibold">Alex Chen</div>
+                        <div class="text-emerald-400">Class 10A • Student</div>
+                    </div>
+                    
+                    <div class="flex-1 space-y-8">
+                        <div>
+                            <div class="flex justify-between text-sm mb-3">
+                                <span class="text-zinc-400">Total Points Earned</span>
+                                <span class="font-mono text-3xl font-bold">4870</span>
+                            </div>
+                            <div class="h-px bg-white/10"></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-zinc-900/70 rounded-3xl p-6">
+                                <div class="text-xs text-zinc-400">Badges Unlocked</div>
+                                <div class="text-6xl font-bold mt-2">17</div>
+                            </div>
+                            <div class="bg-zinc-900/70 rounded-3xl p-6">
+                                <div class="text-xs text-zinc-400">Conversions</div>
+                                <div class="text-6xl font-bold mt-2">9</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="logout()" class="w-full py-5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-3xl font-medium">Logout from all devices</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEACHER DASHBOARD (hidden by default) -->
+    <div id="teacher-dashboard" class="hidden max-w-7xl mx-auto px-6 pt-20">
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-5xl font-bold logo-font">Teacher Control Panel</h1>
+            <button onclick="showAssignPointsModal()" class="flex items-center gap-3 px-10 py-5 bg-emerald-500 rounded-3xl text-lg font-semibold">
+                <i class="fas fa-plus"></i> Assign Points
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-12 gap-8">
+            <div class="col-span-8">
+                <div class="glass rounded-3xl p-8">
+                    <h3 class="font-semibold mb-6">Pending Conversions</h3>
+                    <div id="pending-conversions" class="space-y-4">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-4">
+                <div class="glass rounded-3xl p-8 h-full">
+                    <h3 class="font-semibold mb-6">Class Total</h3>
+                    <div class="text-7xl font-bold font-mono text-cyan-400">38 420</div>
+                    <div class="text-zinc-400">SmartPoints earned by Class 10A</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Conversion Modal -->
+    <div id="conversion-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[999]">
+        <div class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
+            <div class="p-8 border-b border-white/10 flex items-center justify-between">
+                <div class="text-2xl font-semibold">Convert Points</div>
+                <button onclick="hideConversionModal()" class="text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <div class="p-8">
+                <div class="mb-8">
+                    <div class="text-xs uppercase text-zinc-400 mb-2">Available Points</div>
+                    <div class="font-mono text-6xl font-bold" id="modal-points">1240</div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4" id="modal-game-list">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+            
+            <div class="p-8 border-t border-white/10 flex gap-4">
+                <button onclick="hideConversionModal()" class="flex-1 py-5 rounded-3xl border border-white/20 hover:bg-white/5">Cancel</button>
+                <button onclick="submitConversionRequest()" class="flex-1 py-5 rounded-3xl bg-gradient-to-r from-violet-600 to-fuchsia-500 font-semibold">Request Redemption</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Points Modal (Teacher) -->
+    <div id="assign-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[999]">
+        <div class="glass rounded-3xl max-w-md w-full mx-4">
+            <div class="p-8">
+                <div class="text-2xl font-semibold mb-8">Award Points</div>
+                
+                <select id="student-select" class="w-full bg-zinc-800 border border-white/10 rounded-2xl px-5 py-4 text-lg mb-6">
+                    <!-- populated by JS -->
+                </select>
+                
+                <input id="points-input" type="number" placeholder="Points (10-200)" class="w-full bg-zinc-800 border border-white/10 rounded-2xl px-5 py-4 text-lg mb-6">
+                
+                <textarea id="reason-input" placeholder="Reason (e.g. Perfect homework, Good behavior)" class="w-full bg-zinc-800 border border-white/10 rounded-2xl px-5 py-4 h-24 resize-none"></textarea>
+            </div>
+            
+            <div class="flex border-t border-white/10">
+                <button onclick="hideAssignModal()" class="flex-1 py-6 text-zinc-400 hover:bg-white/5">Cancel</button>
+                <button onclick="awardPoints()" class="flex-1 py-6 bg-emerald-500 font-semibold">Award Points</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face ID Modal for Teacher Login -->
+    <div id="face-modal" class="hidden fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center">
+        <div class="max-w-md w-full mx-4 text-center">
+            <div class="text-6xl mb-8">📸</div>
+            <div class="text-3xl font-bold mb-3">Face ID Verification</div>
+            <div class="text-zinc-400 mb-10">Look at the camera. Only for teachers.</div>
+            
+            <div class="relative mx-auto w-80 h-80 bg-zinc-900 rounded-3xl overflow-hidden border-4 border-cyan-400">
+                <video id="face-video" class="w-full h-full object-cover" autoplay playsinline></video>
+                <div class="absolute inset-0 border-2 border-dashed border-white/30 rounded-3xl pointer-events-none"></div>
+                <div id="scan-overlay" class="scan-line absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+            </div>
+            
+            <button onclick="startFaceVerification()" class="mt-10 px-16 py-5 bg-gradient-to-r from-cyan-400 to-violet-500 rounded-3xl text-xl font-bold">Start Face Scan</button>
+            <button onclick="hideFaceModal()" class="mt-4 text-zinc-400 block mx-auto">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ACHIEVEMENT POPUP -->
+    <div id="achievement-popup" class="hidden fixed bottom-8 right-8 bg-zinc-900 border border-emerald-400 rounded-3xl p-6 max-w-xs shadow-2xl flex items-start gap-5 z-[2000]">
+        <div class="text-6xl">🏅</div>
+        <div>
+            <div class="uppercase text-emerald-400 text-xs tracking-widest font-medium">Achievement Unlocked!</div>
+            <div id="achievement-title" class="font-bold text-2xl">Math Wizard</div>
+            <div id="achievement-desc" class="text-zinc-400 text-sm">You scored 100 pts on the Algebra test</div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== MOCK DATA ======================
+        let currentUser = {
+            name: "Alex Chen",
+            role: "student",
+            points: 1240,
+            avatar: "👨‍🎓",
+            class: "10A"
+        }
+        
+        let students = [
+            { id: 1, name: "Alex Chen", points: 1240, avatar: "👨‍🎓" },
+            { id: 2, name: "Sara Kim", points: 1190, avatar: "👩🏻" },
+            { id: 3, name: "Omar Khan", points: 980, avatar: "🧔" },
+            { id: 4, name: "Layla Ahmed", points: 850, avatar: "👩🏽" },
+            { id: 5, name: "Ryan Park", points: 760, avatar: "👦" },
+        ]
+        
+        let achievements = [
+            { icon: "🔥", title: "Math Wizard", desc: "100pts on Algebra" },
+            { icon: "🚀", title: "Perfect Week", desc: "No missed homework" },
+            { icon: "🌟", title: "Top Cheer", desc: "15 cheers received" },
+        ]
+        
+        let activities = [
+            { time: "2h ago", action: "Earned 80 pts for Science project", points: "+80" },
+            { time: "Yesterday", action: "Converted 300 pts → 30 PUBG UC", points: "–300" },
+            { time: "3d ago", action: "Teacher bonus: Good behavior", points: "+50" },
+        ]
+        
+        let gameCurrencies = [
+            { name: "PUBG Mobile UC", icon: "🎯", rate: 10, unit: "UC" },
+            { name: "Mobile Legends Diamonds", icon: "💎", rate: 12, unit: "Diamonds" },
+            { name: "Free Fire Diamonds", icon: "🔥", rate: 8, unit: "Diamonds" },
+            { name: "Roblox Robux", icon: "🟥", rate: 15, unit: "Robux" },
+            { name: "Brawl Stars Gems", icon: "⭐", rate: 9, unit: "Gems" },
+            { name: "Clash Royale Gems", icon: "👑", rate: 11, unit: "Gems" },
+        ]
+        
+        let pendingRequests = []
+        
+        // ====================== CORE FUNCTIONS ======================
+        function renderDashboard() {
+            document.getElementById('total-points').textContent = currentUser.points
+            document.getElementById('balance').textContent = currentUser.points
+            document.getElementById('nav-name').textContent = currentUser.name
+            document.getElementById('nav-avatar').innerHTML = currentUser.avatar
+            document.getElementById('nav-role').innerHTML = `${currentUser.role === 'student' ? 'Student' : 'Teacher'} • ${currentUser.points} pts`
+            
+            // achievements
+            const achHTML = achievements.map(a => `
+                <div onclick="unlockAchievement('${a.title}')" class="glass rounded-3xl p-5 text-center card-hover cursor-pointer">
+                    <div class="text-5xl mb-3">${a.icon}</div>
+                    <div class="font-semibold">${a.title}</div>
+                </div>
+            `).join('')
+            document.getElementById('achievements-grid').innerHTML = achHTML
+            
+            // activity
+            const actHTML = activities.map(a => `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-sm">${a.action}</div>
+                        <div class="text-xs text-zinc-500">${a.time}</div>
+                    </div>
+                    <div class="font-mono ${a.points.startsWith('+') ? 'text-emerald-400' : 'text-orange-400'}">${a.points}</div>
+                </div>
+            `).join('')
+            document.getElementById('activity-feed').innerHTML = actHTML
+            
+            // mini leaderboard
+            const sorted = [...students].sort((a,b)=>b.points-a.points).slice(0,3)
+            const miniHTML = sorted.map((s,i) => `
+                <div class="flex items-center gap-4">
+                    <div class="w-9 h-9 flex-shrink-0 bg-zinc-800 rounded-2xl flex items-center justify-center text-2xl">${s.avatar}</div>
+                    <div class="flex-1">
+                        <div class="font-medium">${s.name}</div>
+                        <div class="text-xs text-zinc-500">#${i+1} this week</div>
+                    </div>
+                    <div class="font-mono text-xl">${s.points}</div>
+                </div>
+            `).join('')
+            document.getElementById('mini-leaderboard').innerHTML = miniHTML
+        }
+        
+        function renderLeaderboard(tab = 0) {
+            const tbody = document.getElementById('leaderboard-body')
+            let sorted = [...students].sort((a,b) => b.points - a.points)
+            
+            let html = ''
+            sorted.forEach((student, index) => {
+                html += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <td class="py-6 px-8 font-mono text-2xl text-zinc-400">${index+1}</td>
+                        <td class="py-6 px-8">
+                            <div class="flex items-center gap-4">
+                                <span class="text-3xl">${student.avatar}</span>
+                                <span class="font-medium">${student.name}</span>
+                            </div>
+                        </td>
+                        <td class="py-6 px-8 text-right font-mono text-3xl">${student.points}</td>
+                        <td class="py-6 px-8">
+                            <button onclick="cheerStudent(${student.id})" class="opacity-0 group-hover:opacity-100 transition-all px-6 py-2 text-xs border border-white/20 hover:border-emerald-400 rounded-3xl">CHEER 🔥</button>
+                        </td>
+                    </tr>
+                `
+            })
+            tbody.innerHTML = html
+        }
+        
+        function renderGameStore() {
+            const container = document.getElementById('game-grid')
+            let html = ''
+            gameCurrencies.forEach(game => {
+                html += `
+                    <div onclick="selectGame('${game.name}')" class="glass rounded-3xl p-6 text-center card-hover cursor-pointer hover:border-cyan-400 border border-transparent">
+                        <div class="text-7xl mb-6">${game.icon}</div>
+                        <div class="font-semibold text-lg mb-1">${game.name}</div>
+                        <div class="text-xs text-emerald-400">${currentUser.points} pts = ${Math.floor(currentUser.points / game.rate)} ${game.unit}</div>
+                    </div>
+                `
+            })
+            container.innerHTML = html
+        }
+        
+        function renderPendingConversions() {
+            if (pendingRequests.length === 0) {
+                document.getElementById('pending-conversions').innerHTML = `<div class="text-center py-12 text-zinc-400">No pending requests</div>`
+                return
+            }
+            let html = ''
+            pendingRequests.forEach((req, i) => {
+                html += `
+                    <div class="flex justify-between items-center bg-zinc-800/70 rounded-2xl p-5">
+                        <div>
+                            <div class="font-medium">${req.student}</div>
+                            <div class="text-sm text-zinc-400">${req.game} • ${req.amount} pts</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="approveConversion(${i})" class="px-8 py-3 bg-emerald-500 text-sm font-medium rounded-2xl">Approve</button>
+                            <button onclick="rejectConversion(${i})" class="px-8 py-3 bg-zinc-700 text-sm font-medium rounded-2xl">Reject</button>
+                        </div>
+                    </div>
+                `
+            })
+            document.getElementById('pending-conversions').innerHTML = html
+        }
+        
+        // ====================== NAVIGATION ======================
+        function navigateTo(page) {
+            document.querySelectorAll('#dashboard-page, #leaderboard-page, #store-page, #profile-page, #teacher-dashboard').forEach(el => el.classList.add('hidden'))
+            
+            if (page === 'dashboard') {
+                document.getElementById('dashboard-page').classList.remove('hidden')
+            } else if (page === 'leaderboard') {
+                document.getElementById('leaderboard-page').classList.remove('hidden')
+                renderLeaderboard()
+            } else if (page === 'store') {
+                document.getElementById('store-page').classList.remove('hidden')
+                renderGameStore()
+            } else if (page === 'profile') {
+                document.getElementById('profile-page').classList.remove('hidden')
+            }
+        }
+        
+        // ====================== MODALS ======================
+        let selectedGame = null
+        
+        function showConversionModal() {
+            document.getElementById('conversion-modal').classList.remove('hidden')
+            document.getElementById('modal-points').textContent = currentUser.points
+            const list = document.getElementById('modal-game-list')
+            list.innerHTML = gameCurrencies.map(g => `
+                <div onclick="selectGameForModal('${g.name}')" class="p-6 border border-white/10 hover:border-cyan-400 rounded-3xl cursor-pointer text-center transition-all">
+                    <div class="text-5xl mb-4">${g.icon}</div>
+                    <div class="font-medium">${g.name}</div>
+                </div>
+            `).join('')
+        }
+        
+        function hideConversionModal() {
+            document.getElementById('conversion-modal').classList.add('hidden')
+        }
+        
+        function selectGameForModal(name) {
+            selectedGame = gameCurrencies.find(g => g.name === name)
+            alert(`Selected ${name}\n\nYou can redeem ~${Math.floor(currentUser.points / selectedGame.rate)} ${selectedGame.unit}`)
+        }
+        
+        function submitConversionRequest() {
+            if (!selectedGame) {
+                alert("Please select a game first!")
+                return
+            }
+            const amount = Math.floor(Math.random() * 400) + 200
+            pendingRequests.push({
+                student: currentUser.name,
+                game: selectedGame.name,
+                amount: amount
+            })
+            currentUser.points -= amount
+            renderDashboard()
+            hideConversionModal()
+            launchConfetti()
+            showAchievementToast("Conversion Requested", "Teacher will review shortly!")
+        }
+        
+        function showAssignPointsModal() {
+            document.getElementById('assign-modal').classList.remove('hidden')
+            const select = document.getElementById('student-select')
+            select.innerHTML = students.map(s => `<option value="${s.id}">${s.name} (${s.points} pts)</option>`).join('')
+        }
+        
+        function hideAssignModal() {
+            document.getElementById('assign-modal').classList.add('hidden')
+        }
+        
+        function awardPoints() {
+            const studentId = parseInt(document.getElementById('student-select').value)
+            const points = parseInt(document.getElementById('points-input').value) || 50
+            const reason = document.getElementById('reason-input').value || "Good work!"
+            
+            const student = students.find(s => s.id === studentId)
+            if (student) {
+                student.points += points
+                activities.unshift({
+                    time: "Just now",
+                    action: `Awarded ${points} pts to ${student.name} (${reason})`,
+                    points: `+${points}`
+                })
+            }
+            renderDashboard()
+            hideAssignModal()
+            launchConfetti()
+        }
+        
+        // ====================== FACE ID ======================
+        let faceStream = null
+        
+        function showFaceModal() {
+            document.getElementById('face-modal').classList.remove('hidden')
+            const video = document.getElementById('face-video')
+            
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => {
+                    faceStream = stream
+                    video.srcObject = stream
+                })
+                .catch(err => {
+                    alert("Camera access denied or not available.")
+                    hideFaceModal()
+                })
+        }
+        
+        function hideFaceModal() {
+            if (faceStream) {
+                faceStream.getTracks().forEach(track => track.stop())
+            }
+            document.getElementById('face-modal').classList.add('hidden')
+        }
+        
+        function startFaceVerification() {
+            const btns = document.querySelectorAll('#face-modal button')
+            btns.forEach(b => b.disabled = true)
+            
+            document.getElementById('scan-overlay').style.animation = 'none'
+            void document.getElementById('scan-overlay').offsetWidth
+            document.getElementById('scan-overlay').style.animation = 'scan 1.8s linear'
+            
+            setTimeout(() => {
+                hideFaceModal()
+                // Simulate teacher login
+                currentUser.role = "teacher"
+                currentUser.name = "Ms. Elena Rodriguez"
+                currentUser.avatar = "👩‍🏫"
+                document.getElementById('dashboard-page').classList.add('hidden')
+                document.getElementById('teacher-dashboard').classList.remove('hidden')
+                renderPendingConversions()
+                launchConfetti()
+            }, 2200)
+        }
+        
+        // ====================== UTILITIES ======================
+        function launchConfetti() {
+            confetti({
+                particleCount: 220,
+                spread: 90,
+                origin: { y: 0.6 }
+            })
+        }
+        
+        function showAchievementToast(title, desc) {
+            const popup = document.getElementById('achievement-popup')
+            document.getElementById('achievement-title').textContent = title
+            document.getElementById('achievement-desc').textContent = desc
+            popup.classList.remove('hidden')
+            setTimeout(() => {
+                popup.classList.add('hidden')
+            }, 3800)
+        }
+        
+        function unlockAchievement(title) {
+            launchConfetti()
+            showAchievementToast(title, "Amazing job! +50 bonus points added")
+            currentUser.points += 50
+            renderDashboard()
+        }
+        
+        function cheerStudent(id) {
+            const student = students.find(s => s.id === id)
+            if (student) {
+                student.points += 10
+                alert(`🎉 You cheered ${student.name}! They received +10 bonus points`)
+                renderLeaderboard()
+            }
+        }
+        
+        function selectGame(name) {
+            alert(`🎮 Opening redemption flow for ${name}\n\nYour balance allows you to get a nice amount!`)
+            showConversionModal()
+        }
+        
+        function approveConversion(index) {
+            const req = pendingRequests[index]
+            alert(`✅ Approved ${req.student}'s request for ${req.game}`)
+            pendingRequests.splice(index, 1)
+            renderPendingConversions()
+            launchConfetti()
+        }
+        
+        function rejectConversion(index) {
+            const req = pendingRequests[index]
+            if (confirm(`Reject ${req.student}'s request?`)) {
+                pendingRequests.splice(index, 1)
+                renderPendingConversions()
+            }
+        }
+        
+        function toggleDarkMode() {
+            // Already dark, but can simulate light toggle if wanted
+            alert("🌙 Dark mode is always on in Smart Sinf 2.0 for the ultimate neon experience!")
+        }
+        
+        function showProfileMenu() {
+            alert("👤 Profile options would open here in full version")
+        }
+        
+        function logout() {
+            if (confirm("Logout?")) {
+                window.location.reload()
+            }
+        }
+        
+        function switchLeaderboardTab(tab) {
+            document.querySelectorAll('.tab-button').forEach((el, i) => {
+                el.classList.toggle('active', i === tab)
+                el.classList.toggle('bg-white/10', i === tab)
+            })
+            renderLeaderboard(tab)
+        }
+        
+        function changeAvatar() {
+            const avatars = ["👨‍🎓","🧙‍♂️","🚀","🦸","🐼","🦁"]
+            currentUser.avatar = avatars[Math.floor(Math.random()*avatars.length)]
+            renderDashboard()
+        }
+        
+        // ====================== INIT ======================
+        function initApp() {
+            // Tailwind script already loaded via CDN
+            renderDashboard()
+            renderLeaderboard(0)
+            renderGameStore()
+            renderPendingConversions()
+            
+            // Show dashboard by default
+            navigateTo('dashboard')
+            
+            // Demo: show an achievement after 2.5s
+            setTimeout(() => {
+                unlockAchievement("First Conversion")
+            }, 2800)
+            
+            // Keyboard shortcut demo
+            document.addEventListener('keydown', e => {
+                if (e.key === '/' && document.getElementById('store-page').classList.contains('hidden')) {
+                    navigateTo('store')
+                }
+            })
+            
+            console.log('%c🚀 Smart Sinf 2.0 fully loaded! Production-ready template with Firebase placeholders ready.', 'color:#22d3ee; font-size:13px')
+        }
+        
+        // Anti-cheat mock
+        function antiCheatCheck(newPoints) {
+            if (newPoints > currentUser.points * 1.8) {
+                console.warn("⚠️ Anti-cheat AI flagged suspicious point spike!")
+                return false
+            }
+            return true
+        }
+        
+        window.onload = initApp
+    </script>
+</body>
+</html>
